@@ -5,7 +5,7 @@ public class Main {
 
 	public static Scanner fileReader;
 	public static Scanner userIn = new Scanner(System.in);
-	public static String fileName = "default.txt";
+	public static String fileName = "msg.txt";
 	public static String encryptFile = "encrypt.txt";
 	public static PrintWriter pw;
 	
@@ -19,12 +19,27 @@ public class Main {
 		// rotate key 90 degrees clockwise and fill in 16 more spaces. Keep rotating until 64 spaces are filled (one line).
 		// copy each 1*8 row of 8*8 grid = coded group.
 		// this is the coded message!
-
-		System.out.println("Enter file name with text.");
-		fileName = userIn.next();
 		
-		initScanner(fileName);
-		initOutput(encryptFile);
+		// for (int r = 0; r < 8; r++) {
+		// for (int c = 0; c < 8; c++) {
+		// System.out.print(d.grid[r][c].getNum() + "" +
+		// d.grid[r][c].getQuad());
+		// }
+		// System.out.println();
+		// }
+
+		// System.out.println("Enter file name with text.");
+		// fileName = userIn.next();
+		
+//		initOutput(fileName);
+		
+		File file = new File(fileName);
+//		initScanner(fileName);
+		
+		Cipher d = new Cipher();
+		d.encrypt(file, file);
+		
+		
 		
 	}
 	public static void initOutput(String fileName) {
