@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.Scanner;
 
 public class Cipher {
+	private String gridKeyFile = "key.txt";
 	private String[] gridKey;
 	public static Cell[][] grid;
 
@@ -16,7 +17,8 @@ public class Cipher {
 		}
 
 		initGrid();
-		genKey();
+		//genKey();
+		fileToKey();
 	}
 
 	private void initGrid() {
@@ -44,11 +46,11 @@ public class Cipher {
 
 	private void genKey() {
 		PrintWriter pw = null;
-		File file = new File("key.txt");
+		File file = new File(gridKeyFile);
 		try {
 			pw = new PrintWriter(file);
 		} catch (FileNotFoundException ex) {
-			System.out.println("Cannot create key.txt file");
+			System.out.println("Cannot create " + gridKeyFile + " file.");
 			System.exit(1);
 		}
 
@@ -58,6 +60,24 @@ public class Cipher {
 		}
 
 		pw.close();
+	}
+	
+	private void fileToKey() {
+		File keyFile = new File(gridKeyFile);
+		Scanner fileReader = null;
+		try {
+			fileReader = new Scanner(keyFile);
+		} catch (FileNotFoundException ex) {
+			System.out.println("File not found at \"" + keyFile.getName()
+					+ "\".");
+			ex.printStackTrace();
+		}
+		
+		int k = 0;
+		
+		while (fileReader.hasNextLine()) {
+			gridKey[k++] = fileReader.nextLine();
+		}
 	}
 
 	public void encrypt(File msgFile, File encryptFile) {
@@ -75,9 +95,64 @@ public class Cipher {
 			String line = fileReader.nextLine();
 			line = fillCarets(line);
 			line = reverse(line);
+			line = fillKey(grid, gridKey, line);
 			System.out.println(line);
 		}
 
+	}
+
+	// Fills grid through key with lineInput parameter
+	private String fillKey(Cell[][] grid, String[] gridKey, String lineInput) {
+		int k = 0;
+		for (int rot = 0; rot < 4; rot++) {
+			for (int r = 0; r < grid.length; r++) {
+				for (int c = 0; c < grid[0].length; c++) {
+					if (matches(grid[r][c], gridKey)) {
+						grid[r][c].setValue(lineInput.charAt(k++));
+					}
+				}
+			}
+			rotateKey(gridKey);
+		}
+		return gridToString(grid);
+	}
+
+	// checks if any element in gridKey matches cell member variables (num and
+	// letter)
+	private boolean matches(Cell c, String[] gridKey) {
+		for (String s : gridKey) {
+			char quad = s.charAt(s.length() - 1);
+			
+			int num = Integer.parseInt(s.substring(0, s.length() - 1));
+			if (c.getNum() == num && c.getQuad() == quad) {
+				//System.out.print(c.getNum() + "" + c.getQuad());
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private void rotateKey(String[] gridKey) {
+		for (int i = 0; i < gridKey.length; i++) {
+			String s = gridKey[i];
+			if (gridKey[i].charAt(s.length() - 1) == 'd') {
+				gridKey[i] = s.substring(0, s.length() - 1) + 'a';
+			} else {
+				gridKey[i] = s.substring(0, s.length() - 1)
+						+ (s.charAt(s.length() - 1) + 1);
+			}
+		}
+	}
+
+	private String gridToString(Cell[][] grid) {
+		String ret = "";
+		for (int r = 0; r < grid.length; r++) {
+			for (int c = 0; c < grid[0].length; c++) {
+				ret += grid[r][c].getValue();
+			}
+		}
+		return ret;
 	}
 
 	// PRECONDITION: line.length() <= 64
