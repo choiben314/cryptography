@@ -2,8 +2,13 @@ import java.io.*;
 import java.util.Scanner;
 
 public class Cipher {
+
+	private Scanner userIn = new Scanner(System.in);
+	private String msgName = "msg.txt";
+	private String encryptName = "encrypt.txt";
 	private String gridKeyFile = "key.txt";
 	private String[] gridKey;
+
 	public static Cell[][] grid;
 
 	public Cipher() {
@@ -17,7 +22,7 @@ public class Cipher {
 		}
 
 		initGrid();
-		//genKey();
+		// genKey();
 		fileToKey();
 	}
 
@@ -61,7 +66,7 @@ public class Cipher {
 
 		pw.close();
 	}
-	
+
 	private void fileToKey() {
 		File keyFile = new File(gridKeyFile);
 		Scanner fileReader = null;
@@ -72,16 +77,21 @@ public class Cipher {
 					+ "\".");
 			ex.printStackTrace();
 		}
-		
+
 		int k = 0;
-		
+
 		while (fileReader.hasNextLine()) {
 			gridKey[k++] = fileReader.nextLine();
 		}
 	}
 
-	public void encrypt(File msgFile, File encryptFile) {
-		// probably split into functions later.
+	public void encryptToFile() {
+		Scanner userIn = new Scanner(System.in);
+
+		System.out.print("Enter name of file with text: ");
+		msgName = userIn.next();
+		File msgFile = new File(msgName);
+
 		Scanner fileReader = null;
 		try {
 			fileReader = new Scanner(msgFile);
@@ -91,14 +101,31 @@ public class Cipher {
 			ex.printStackTrace();
 		}
 
-		while (fileReader.hasNextLine()) {
-			String line = fileReader.nextLine();
-			line = fillCarets(line);
-			line = reverse(line);
-			line = fillKey(grid, gridKey, line);
-			System.out.println(line);
+		System.out
+				.print("Enter name of file to input encrypted message into: ");
+		encryptName = userIn.next();
+		File encryptFile = new File(encryptName);
+
+		userIn.close();
+
+		PrintWriter encryptWrite = null;
+		try {
+			encryptWrite = new PrintWriter(encryptFile);
+		} catch (FileNotFoundException ex) {
+			System.out.println("Cannot create " + encryptFile.getName()
+					+ " file.");
+			System.exit(1);
 		}
 
+		while (fileReader.hasNextLine()) {
+			String line = fileReader.nextLine();
+			encryptWrite.println(encrypt(line));
+		}
+		encryptWrite.close();
+	}
+
+	public String encrypt(String line) {
+		return fillKey(grid, gridKey, reverse(fillCarets(line)));
 	}
 
 	// Fills grid through key with lineInput parameter
@@ -122,10 +149,10 @@ public class Cipher {
 	private boolean matches(Cell c, String[] gridKey) {
 		for (String s : gridKey) {
 			char quad = s.charAt(s.length() - 1);
-			
+			// System.out.println(s + " " + quad);
 			int num = Integer.parseInt(s.substring(0, s.length() - 1));
 			if (c.getNum() == num && c.getQuad() == quad) {
-				//System.out.print(c.getNum() + "" + c.getQuad());
+				// System.out.print(c.getNum() + "" + c.getQuad());
 				return true;
 			}
 		}
@@ -136,11 +163,11 @@ public class Cipher {
 	private void rotateKey(String[] gridKey) {
 		for (int i = 0; i < gridKey.length; i++) {
 			String s = gridKey[i];
-			if (gridKey[i].charAt(s.length() - 1) == 'd') {
+			if (s.charAt(s.length() - 1) == 'd') {
 				gridKey[i] = s.substring(0, s.length() - 1) + 'a';
 			} else {
 				gridKey[i] = s.substring(0, s.length() - 1)
-						+ (s.charAt(s.length() - 1) + 1);
+						+ (char) (s.charAt(s.length() - 1) + 1);
 			}
 		}
 	}
