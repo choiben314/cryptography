@@ -13,7 +13,7 @@ public class Main {
 		// rotating until 64 spaces are filled (one line).
 		// copy each 1*8 row of 8*8 grid = coded group.
 		// this is the coded message!
-
+		Cipher grille = new Cipher();
 		char opt = 0;
 		Scanner input = new Scanner(System.in);
 
@@ -23,28 +23,26 @@ public class Main {
 			System.out.println("\n1.) Encrypt file.");
 			System.out.println("2.) Decrypt file.");
 			System.out.println("3.) Custom key.");
-			System.out.println("4.) Generate new key.");
+			System.out.println("4.) Set key from file.");
 			System.out.println("5.) Exit.\n");
 
 			System.out.print("Enter option: ");
-			
+
 			opt = input.nextLine().charAt(0);
-			
+
 			switch (opt) {
 			case '1':
-				Cipher d = new Cipher();
-				d.encryptToFile();
+				grille.encryptToFile();
 				break;
-			
+
 			case '2':
-				Cipher e = new Cipher();
-				//e.decryptToFile("hello");
+				grille.decryptToFile();
 				break;
 			case '3':
-				
+				grille.setNewGridKey();
 				break;
 			case '4':
-				
+				grille.setKeyFromFile();
 				break;
 			}
 		}

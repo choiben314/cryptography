@@ -1,13 +1,13 @@
-
 public class Cell {
 	private int num;
 	private char quad;
 	private char value;
-	
-	public Cell () {
+
+	public Cell() {
 		num = -1;
 		quad = 'z';
 	}
+
 	public Cell(int num, char quad, char value) {
 		this.num = num;
 		this.quad = quad;
@@ -29,9 +29,11 @@ public class Cell {
 	public void setQuad(char quad) {
 		this.quad = quad;
 	}
+
 	public char getValue() {
 		return value;
 	}
+
 	public void setValue(char value) {
 		this.value = value;
 	}

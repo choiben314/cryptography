@@ -5,10 +5,11 @@ public class Cipher {
 
 	private String msgName = "msg.txt";
 	private String encryptName = "encrypt.txt";
+	private String decryptName = "decrypt.txt";
 	private String gridKeyFile = "key.txt";
-	private String[] gridKey;
 
 	public static Cell[][] grid;
+	private String[] gridKey;
 
 	public Cipher() {
 		gridKey = new String[16];
@@ -20,12 +21,12 @@ public class Cipher {
 			}
 		}
 
-		initGrid();
+		initGrid(grid);
 		// genKey();
-		fileToKey();
+		fileToKey(gridKeyFile);
 	}
 
-	private void initGrid() {
+	private void initGrid(Cell[][] grid) {
 		for (int r = 0; r < 4; r++) {
 			for (int c = 0; c < 4; c++) {
 				grid[r][c].setNum(4 * r + c + 1);
@@ -48,13 +49,13 @@ public class Cipher {
 		}
 	}
 
-	private void genKey() {
+	private void genKey(String keyName) {
 		PrintWriter pw = null;
-		File file = new File(gridKeyFile);
+		File file = new File(keyName);
 		try {
 			pw = new PrintWriter(file);
 		} catch (FileNotFoundException ex) {
-			System.out.println("Cannot create " + gridKeyFile + " file.");
+			System.out.println("Cannot create " + keyName + " file.");
 			System.exit(1);
 		}
 
@@ -66,8 +67,8 @@ public class Cipher {
 		pw.close();
 	}
 
-	private void fileToKey() {
-		File keyFile = new File(gridKeyFile);
+	private void fileToKey(String keyName) {
+		File keyFile = new File(keyName);
 		Scanner fileReader = null;
 		try {
 			fileReader = new Scanner(keyFile);
@@ -105,9 +106,8 @@ public class Cipher {
 		if (userIn.hasNextLine()) {
 			encryptName = userIn.nextLine();
 		}
-		File encryptFile = new File(encryptName);
 
-		userIn.close();
+		File encryptFile = new File(encryptName);
 
 		PrintWriter encryptWrite = null;
 		try {
@@ -117,6 +117,8 @@ public class Cipher {
 					+ " file.");
 			System.exit(1);
 		}
+
+		System.out.println();
 
 		while (fileReader.hasNextLine()) {
 			String line = fileReader.nextLine();
@@ -128,12 +130,12 @@ public class Cipher {
 	}
 
 	public void decryptToFile() {
-		
-		Scanner userIn = new Scanner(System.in);
-		System.out.println("Enter text file name for message to decode.");
-		msgName = userIn.nextLine();
 
-		File msgFile = new File(msgName);
+		Scanner userIn = new Scanner(System.in);
+		System.out.print("Enter text file name for message to decode: ");
+		encryptName = userIn.nextLine();
+
+		File msgFile = new File(encryptName);
 
 		Scanner fileReader = null;
 		try {
@@ -143,18 +145,86 @@ public class Cipher {
 					+ "\".");
 			ex.printStackTrace();
 		}
-		
+
+		File decryptFile = new File(decryptName);
+
+		PrintWriter decryptWrite = null;
+		try {
+			decryptWrite = new PrintWriter(decryptFile);
+		} catch (FileNotFoundException ex) {
+			System.out.println("Cannot create " + decryptFile.getName()
+					+ " file.");
+			System.exit(1);
+		}
+
+		System.out
+				.print("Enter name of file to input decrypted message into: ");
+		if (userIn.hasNextLine()) {
+			decryptName = userIn.nextLine();
+		}
+
+		File encryptFile = new File(decryptName);
+
+		PrintWriter encryptWrite = null;
+		try {
+			encryptWrite = new PrintWriter(decryptFile);
+		} catch (FileNotFoundException ex) {
+			System.out.println("Cannot create " + decryptFile.getName()
+					+ " file.");
+			System.exit(1);
+		}
+
+		System.out.println();
 		while (fileReader.hasNextLine()) {
 			String line = fileReader.nextLine();
-			line = decrypt(line);
+			line = decrypt(gridKey, line);
 			System.out.println(line);
-			//encryptWrite.println(line);
+			decryptWrite.println(line);
 		}
+		decryptWrite.close();
 	}
-	public String decrypt(String line) {
-		return "";
+
+	// Precondition: LINES ARE ALL 64 CHARS IN LENGTH
+	public String decrypt(String[] gridKey, String lineInput) {
+		Cell[][] decode = new Cell[8][8];
+		for (int r = 0; r < 8; r++) {
+			for (int c = 0; c < 8; c++) {
+				decode[r][c] = new Cell();
+			}
+		}
+		initGrid(decode);
+
+		int k = 0;
+
+		for (int r = 0; r < decode.length; r++) {
+			for (int c = 0; c < decode[0].length; c++) {
+				decode[r][c].setValue(lineInput.charAt(k++));
+			}
+		}
+
+		String line = "";
+
+		for (int rot = 0; rot < 4; rot++) {
+			for (int r = 0; r < decode.length; r++) {
+				for (int c = 0; c < decode[0].length; c++) {
+					if (matches(decode[r][c], gridKey)) {
+						line += decode[r][c].getValue();
+					}
+				}
+			}
+			rotateKey(gridKey);
+		}
+
+		line = reverse(line);
+		int caretLoc = line.length() - 1;
+		while (line.charAt(caretLoc) == '^') {
+			caretLoc--;
+		}
+		line = line.substring(0, caretLoc + 1);
+
+		return line;
 	}
-	
+
 	public String encrypt(String line) {
 		return fillKey(grid, gridKey, reverse(fillCarets(line)));
 	}
@@ -180,10 +250,8 @@ public class Cipher {
 	private boolean matches(Cell c, String[] gridKey) {
 		for (String s : gridKey) {
 			char quad = s.charAt(s.length() - 1);
-			// System.out.println(s + " " + quad);
 			int num = Integer.parseInt(s.substring(0, s.length() - 1));
 			if (c.getNum() == num && c.getQuad() == quad) {
-				// System.out.print(c.getNum() + "" + c.getQuad());
 				return true;
 			}
 		}
@@ -200,6 +268,12 @@ public class Cipher {
 				gridKey[i] = s.substring(0, s.length() - 1)
 						+ (char) (s.charAt(s.length() - 1) + 1);
 			}
+		}
+	}
+
+	private void rotateKeyCCW(String[] gridKey) {
+		for (int i = 0; i < 3; i++) {
+			rotateKey(gridKey);
 		}
 	}
 
@@ -228,5 +302,40 @@ public class Cipher {
 			temp += line.charAt(line.length() - i - 1);
 		}
 		return temp;
+	}
+
+	public void setNewGridKey() {
+		Scanner read = new Scanner(System.in);
+		System.out
+				.print("Enter name of file where you would like to store your key: ");
+		String gridName = read.nextLine();
+
+		PrintWriter pw = null;
+		File file = new File(gridName);
+		try {
+			pw = new PrintWriter(file);
+		} catch (FileNotFoundException ex) {
+			System.out.println("Cannot create " + gridName + " file.");
+			System.exit(1);
+		}
+
+		System.out
+				.println("\nNote: There are four quadrants (a, b, c, d), starting with 'a' in the top left and moving clockwise.");
+		System.out
+				.println("\nEnter quadrant (a,b,c,d) for each of 16 key elements:\n");
+		for (int i = 0; i < 16; i++) {
+			System.out.print("Key " + (i + 1) + "/16: ");
+			char let = read.nextLine().charAt(0);
+			pw.println((i + 1) + "" + let);
+		}
+		pw.close();
+	}
+
+	public void setKeyFromFile() {
+		Scanner read = new Scanner(System.in);
+		System.out.print("Enter text file name of desired key: ");
+		String keyName = read.nextLine();
+
+		fileToKey(keyName);
 	}
 }
