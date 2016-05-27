@@ -1,9 +1,8 @@
-import java.util.*;
+import java.util.Scanner;
 import java.io.*;
 
 public class Main {
 	public static void main(String[] args) {
-
 		// number grid 1-16 in each quadrant
 		// generate key with 1-16
 		// get each line from message and fill end of each line with ^'s
@@ -15,10 +14,10 @@ public class Main {
 		// copy each 1*8 row of 8*8 grid = coded group.
 		// this is the coded message!
 
-		Scanner userIn = new Scanner(System.in);
-		int opt = 0;
+		char opt = 0;
+		Scanner input = new Scanner(System.in);
 
-		while (opt != 5) {			
+		while (opt != '5') {
 			System.out.println("\n~~~~MENU~~~~");
 
 			System.out.println("\n1.) Encrypt file.");
@@ -27,14 +26,28 @@ public class Main {
 			System.out.println("4.) Generate new key.");
 			System.out.println("5.) Exit.\n");
 
-			System.out.println("Enter option: ");
-			opt = userIn.nextInt();
-
+			System.out.print("Enter option: ");
+			
+			opt = input.nextLine().charAt(0);
+			
 			switch (opt) {
-			case 1:
+			case '1':
 				Cipher d = new Cipher();
 				d.encryptToFile();
+				break;
+			
+			case '2':
+				Cipher e = new Cipher();
+				//e.decryptToFile("hello");
+				break;
+			case '3':
+				
+				break;
+			case '4':
+				
+				break;
 			}
 		}
+		input.close();
 	}
 }

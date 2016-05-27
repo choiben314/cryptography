@@ -3,7 +3,6 @@ import java.util.Scanner;
 
 public class Cipher {
 
-	private Scanner userIn = new Scanner(System.in);
 	private String msgName = "msg.txt";
 	private String encryptName = "encrypt.txt";
 	private String gridKeyFile = "key.txt";
@@ -87,9 +86,9 @@ public class Cipher {
 
 	public void encryptToFile() {
 		Scanner userIn = new Scanner(System.in);
-
 		System.out.print("Enter name of file with text: ");
-		msgName = userIn.next();
+		msgName = userIn.nextLine();
+
 		File msgFile = new File(msgName);
 
 		Scanner fileReader = null;
@@ -103,7 +102,9 @@ public class Cipher {
 
 		System.out
 				.print("Enter name of file to input encrypted message into: ");
-		encryptName = userIn.next();
+		if (userIn.hasNextLine()) {
+			encryptName = userIn.nextLine();
+		}
 		File encryptFile = new File(encryptName);
 
 		userIn.close();
@@ -119,11 +120,41 @@ public class Cipher {
 
 		while (fileReader.hasNextLine()) {
 			String line = fileReader.nextLine();
-			encryptWrite.println(encrypt(line));
+			line = encrypt(line);
+			System.out.println(line);
+			encryptWrite.println(line);
 		}
 		encryptWrite.close();
 	}
 
+	public void decryptToFile() {
+		
+		Scanner userIn = new Scanner(System.in);
+		System.out.println("Enter text file name for message to decode.");
+		msgName = userIn.nextLine();
+
+		File msgFile = new File(msgName);
+
+		Scanner fileReader = null;
+		try {
+			fileReader = new Scanner(msgFile);
+		} catch (FileNotFoundException ex) {
+			System.out.println("File not found at \"" + msgFile.getName()
+					+ "\".");
+			ex.printStackTrace();
+		}
+		
+		while (fileReader.hasNextLine()) {
+			String line = fileReader.nextLine();
+			line = decrypt(line);
+			System.out.println(line);
+			//encryptWrite.println(line);
+		}
+	}
+	public String decrypt(String line) {
+		return "";
+	}
+	
 	public String encrypt(String line) {
 		return fillKey(grid, gridKey, reverse(fillCarets(line)));
 	}
