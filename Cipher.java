@@ -7,6 +7,7 @@ public class Cipher {
 	private String encryptName = "encrypt.txt";
 	private String decryptName = "decrypt.txt";
 	private String gridKeyFile = "key.txt";
+	private String currentGridKey;
 
 	public static Cell[][] grid;
 	private String[] gridKey;
@@ -24,6 +25,7 @@ public class Cipher {
 		initGrid(grid);
 		// genKey();
 		fileToKey(gridKeyFile);
+		currentGridKey = gridKeyFile;
 	}
 
 	private void initGrid(Cell[][] grid) {
@@ -50,6 +52,7 @@ public class Cipher {
 	}
 
 	private void genKey(String keyName) {
+
 		PrintWriter pw = null;
 		File file = new File(keyName);
 		try {
@@ -80,14 +83,16 @@ public class Cipher {
 
 		int k = 0;
 
+		currentGridKey = keyName;
 		while (fileReader.hasNextLine()) {
 			gridKey[k++] = fileReader.nextLine();
 		}
 	}
 
+	@SuppressWarnings("resource")
 	public void encryptToFile() {
 		Scanner userIn = new Scanner(System.in);
-		System.out.print("Enter name of file with text: ");
+		System.out.print("\nEnter name of file with text: ");
 		msgName = userIn.nextLine();
 
 		File msgFile = new File(msgName);
@@ -129,10 +134,11 @@ public class Cipher {
 		encryptWrite.close();
 	}
 
+	@SuppressWarnings("resource")
 	public void decryptToFile() {
 
 		Scanner userIn = new Scanner(System.in);
-		System.out.print("Enter text file name for message to decode: ");
+		System.out.print("\nEnter text file name for message to decode: ");
 		encryptName = userIn.nextLine();
 
 		File msgFile = new File(encryptName);
@@ -146,28 +152,17 @@ public class Cipher {
 			ex.printStackTrace();
 		}
 
-		File decryptFile = new File(decryptName);
-
-		PrintWriter decryptWrite = null;
-		try {
-			decryptWrite = new PrintWriter(decryptFile);
-		} catch (FileNotFoundException ex) {
-			System.out.println("Cannot create " + decryptFile.getName()
-					+ " file.");
-			System.exit(1);
-		}
-
 		System.out
 				.print("Enter name of file to input decrypted message into: ");
 		if (userIn.hasNextLine()) {
 			decryptName = userIn.nextLine();
 		}
 
-		File encryptFile = new File(decryptName);
+		File decryptFile = new File(decryptName);
 
-		PrintWriter encryptWrite = null;
+		PrintWriter decryptWrite = null;
 		try {
-			encryptWrite = new PrintWriter(decryptFile);
+			decryptWrite = new PrintWriter(decryptFile);
 		} catch (FileNotFoundException ex) {
 			System.out.println("Cannot create " + decryptFile.getName()
 					+ " file.");
@@ -271,12 +266,6 @@ public class Cipher {
 		}
 	}
 
-	private void rotateKeyCCW(String[] gridKey) {
-		for (int i = 0; i < 3; i++) {
-			rotateKey(gridKey);
-		}
-	}
-
 	private String gridToString(Cell[][] grid) {
 		String ret = "";
 		for (int r = 0; r < grid.length; r++) {
@@ -304,6 +293,7 @@ public class Cipher {
 		return temp;
 	}
 
+	@SuppressWarnings("resource")
 	public void setNewGridKey() {
 		Scanner read = new Scanner(System.in);
 		System.out
@@ -331,11 +321,25 @@ public class Cipher {
 		pw.close();
 	}
 
+	@SuppressWarnings("resource")
+	public void setRandomKey() {
+		Scanner read = new Scanner(System.in);
+		System.out
+				.print("\nEnter name of file where you would like to store your key: ");
+		String gridName = read.nextLine();
+		genKey(gridName);
+	}
+
+	@SuppressWarnings("resource")
 	public void setKeyFromFile() {
 		Scanner read = new Scanner(System.in);
-		System.out.print("Enter text file name of desired key: ");
+		System.out.print("\nEnter text file name of desired key: ");
 		String keyName = read.nextLine();
 
 		fileToKey(keyName);
+	}
+
+	public String getCurrentGridKey() {
+		return currentGridKey;
 	}
 }
